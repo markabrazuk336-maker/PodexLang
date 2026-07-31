@@ -36,16 +36,21 @@ RE_AT = re.compile(r"\bat\s+(?P<line>\d+):(?P<col>\d+)\b")
 
 
 def project_root() -> Path:
+    env = os.environ.get("PODEX_ROOT")
+    if env:
+        return Path(env).resolve()
     return Path(__file__).resolve().parent.parent
 
 
 def find_podexc(root: Path | None = None) -> Path | None:
     root = root or project_root()
     candidates = [
+        root / "bin" / "podexc.exe",
         root / "build" / "podexc.exe",
         root / "build" / "Release" / "podexc.exe",
         root / "build" / "Debug" / "podexc.exe",
         root / "build" / "podexc",
+        root / "bin" / "podexc",
     ]
     for c in candidates:
         if c.is_file():

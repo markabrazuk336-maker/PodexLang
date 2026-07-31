@@ -1,8 +1,7 @@
 @echo off
 cd /d "%~dp0"
-python studio\app.py %*
-if errorlevel 1 (
-  echo.
-  echo Failed to start Podex Studio. Is Python installed?
-  pause
+if exist "%~dp0PodexStudio.cmd" (
+  call "%~dp0PodexStudio.cmd" %*
+) else (
+  python studio\app.py %*
 )

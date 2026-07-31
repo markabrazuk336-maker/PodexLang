@@ -1,6 +1,7 @@
 # --- Build / CMake ---
 build/
 out/
+dist/
 cmake-build-*/
 CMakeCache.txt
 CMakeFiles/
@@ -34,9 +35,6 @@ _deps/
 # Generated C++ from podexc (keep compiler sources)
 *.cpp
 !compiler/*.cpp
-
-# Studio build artifacts
-build/studio_out/
 
 # User projects created in Studio
 projects/
