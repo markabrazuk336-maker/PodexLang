@@ -11,15 +11,23 @@ cd D:\Cursor_Projects\PodexLang
 .\installer\build_installer.bat
 ```
 
-Готовый файл: `dist\PodexLang-Setup-0.2.2.exe`
+Готовый файл: `dist\PodexLang-Setup-0.2.3.exe`
 
 Установщик (Inno Setup 6):
-- ставит Podex Studio + `podexc` + examples/stdlib
+- ставит Podex Studio + `podexc` + **PodexCLI** (`podex`)
+- добавляет `{app}\bin` в **PATH** (cmd / PowerShell)
 - иконка для `.pdx`
-- ПКМ → **Open with Podex Studio** / **Edit with Podex Studio**
-- ярлыки в меню Пуск (и опционально на рабочий стол)
+- ПКМ → **Open with Podex Studio**
+- обновляет ярлык на рабочем столе
 
-Нужен установленный **Python 3** (для Studio). Для Build/Run программ — **g++** (MinGW).
+```powershell
+podex version
+podex run examples\hello.pdx
+PodexCLI run examples\math_demo.pdx
+podex studio
+```
+
+После установки открой **новое** окно терминала, чтобы PATH подхватился.
 
 ### Если Windows блокирует установщик (SmartScreen)
 
@@ -28,7 +36,7 @@ cd D:\Cursor_Projects\PodexLang
 1. В окне нажми **Подробнее** (More info)
 2. Затем **Выполнить в любом случае** (Run anyway)
 
-Или ПКМ по `PodexLang-Setup-0.2.2.exe` → **Свойства** → внизу галка **Разблокировать** → ОК → запусти снова.
+Или ПКМ по `PodexLang-Setup-0.2.3.exe` → **Свойства** → внизу галка **Разблокировать** → ОК → запусти снова.
 
 ## Идея
 

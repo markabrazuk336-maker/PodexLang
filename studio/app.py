@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import shutil
 import sys
 import threading
 import tkinter as tk
@@ -28,6 +30,41 @@ fn main() -> int {
     return 0
 }
 """
+
+
+def user_workspace() -> Path:
+    base = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "PodexLang" / "workspace"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def path_is_writable(path: Path) -> bool:
+    """True if we can create/overwrite files in this path's directory (or the file itself)."""
+    try:
+        target = path if path.is_dir() else path.parent
+        target.mkdir(parents=True, exist_ok=True)
+        probe = target / ".podex_write_test"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink(missing_ok=True)
+        return True
+    except OSError:
+        return False
+
+
+def ensure_user_examples(install_root: Path) -> Path:
+    """Copy bundled examples into a writable user folder (for Program Files installs)."""
+    src = install_root / "examples"
+    dest = user_workspace() / "examples"
+    dest.mkdir(parents=True, exist_ok=True)
+    if src.is_dir():
+        for f in src.glob("*.pdx"):
+            out = dest / f.name
+            if not out.exists():
+                try:
+                    shutil.copy2(f, out)
+                except OSError:
+                    pass
+    return dest
 
 
 class PodexStudio(tk.Tk):
@@ -59,7 +96,19 @@ class PodexStudio(tk.Tk):
         self.bind_all("<Control-Shift-N>", lambda e: self.new_project())
 
         self.explorer.load_project(ROOT)
-        welcome = ROOT / "examples" / "math_demo.pdx"
+
+        # Prefer writable examples (Program Files installs are read-only)
+        examples_dir = ROOT / "examples"
+        if not path_is_writable(examples_dir):
+            examples_dir = ensure_user_examples(ROOT)
+            self.explorer.load_project(user_workspace())
+            self._append_output(
+                f"Note: examples are read-only in Program Files.\n"
+                f"Editable copies: {examples_dir}\n",
+                "info",
+            )
+
+        welcome = examples_dir / "math_demo.pdx"
         if welcome.is_file():
             self.open_path(welcome)
         else:
@@ -388,16 +437,19 @@ class PodexStudio(tk.Tk):
         dlg.bind("<Return>", lambda e: create())
 
     def open_file_dialog(self) -> None:
+        start = user_workspace() / "examples"
+        if not start.is_dir():
+            start = ROOT / "examples"
         path = filedialog.askopenfilename(
             title="Open PodexLang file",
-            initialdir=str(ROOT / "examples"),
+            initialdir=str(start),
             filetypes=[("PodexLang", "*.pdx"), ("All files", "*.*")],
         )
         if path:
             self.open_path(Path(path))
 
     def open_folder(self) -> None:
-        path = filedialog.askdirectory(title="Open Folder", initialdir=str(ROOT))
+        path = filedialog.askdirectory(title="Open Folder", initialdir=str(user_workspace()))
         if path:
             self.explorer.load_project(Path(path))
             self._set_status(f"Opened folder: {path}")
@@ -424,6 +476,31 @@ class PodexStudio(tk.Tk):
             self._update_title()
             self._set_status(f"Saved {tab.path.name}")
             return True
+        except PermissionError:
+            # Program Files / protected paths — save a writable copy
+            dest_dir = user_workspace() / "examples"
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest = dest_dir / tab.path.name
+            try:
+                dest.write_text(tab.editor.get_text(), encoding="utf-8")
+            except OSError as e:
+                messagebox.showerror(APP_NAME, f"Cannot save:\n{e}")
+                return False
+            tab.path = dest
+            tab.editor.mark_saved()
+            self.tabs.refresh_titles()
+            self._update_title()
+            self._set_status(f"Saved writable copy: {dest}")
+            self._append_output(
+                f"Saved to writable folder (original was read-only):\n  {dest}\n",
+                "info",
+            )
+            messagebox.showinfo(
+                APP_NAME,
+                "This file is in a protected folder (e.g. Program Files).\n\n"
+                f"Saved a copy to:\n{dest}",
+            )
+            return True
         except OSError as e:
             messagebox.showerror(APP_NAME, f"Cannot save:\n{e}")
             return False
@@ -432,9 +509,11 @@ class PodexStudio(tk.Tk):
         tab = self.tabs.current()
         if not tab:
             return False
+        start = user_workspace() / "examples"
+        start.mkdir(parents=True, exist_ok=True)
         path = filedialog.asksaveasfilename(
             title="Save As",
-            initialdir=str(ROOT / "examples"),
+            initialdir=str(start),
             defaultextension=".pdx",
             filetypes=[("PodexLang", "*.pdx"), ("All files", "*.*")],
         )

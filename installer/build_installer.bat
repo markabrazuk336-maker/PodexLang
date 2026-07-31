@@ -36,6 +36,6 @@ echo   "%ISCC%"
 if errorlevel 1 exit /b 1
 
 echo.
-echo OK: dist\PodexLang-Setup-0.2.2.exe
+echo OK: dist\PodexLang-Setup-0.2.3.exe
 dir /b dist\PodexLang-Setup-*.exe
 endlocal
