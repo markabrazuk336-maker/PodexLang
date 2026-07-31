@@ -1,0 +1,6 @@
+# PodexLang stdlib: orbit (3D)
+# Builtin — raylib backend. See stdlib/native/orbit.hpp
+# orbit_open / orbit_close / orbit_should_close
+# orbit_begin / orbit_end / orbit_clear
+# orbit_begin_3d / orbit_end_3d
+# orbit_cube / orbit_sphere / orbit_grid / orbit_text / orbit_fps

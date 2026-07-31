@@ -1,0 +1,5 @@
+# PodexLang stdlib: canvas (2D)
+# Builtin — raylib backend. See stdlib/native/canvas.hpp
+# canvas_open / canvas_close / canvas_should_close
+# canvas_begin / canvas_end / canvas_clear
+# canvas_circle / canvas_rect / canvas_line / canvas_text / canvas_fps

@@ -71,3 +71,8 @@ Desktop.ini
 *.tmp
 *.temp
 *~
+
+# --- Third-party ---
+third_party/raylib.zip
+third_party/raylib-5.5_win64_mingw-w64/
+# keep junction/copy at third_party/raylib/ in releases

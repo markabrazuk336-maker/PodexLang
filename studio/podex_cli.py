@@ -13,13 +13,21 @@ ROOT = Path(os.environ.get("PODEX_ROOT", STUDIO_DIR.parent)).resolve()
 if str(STUDIO_DIR) not in sys.path:
     sys.path.insert(0, str(STUDIO_DIR))
 
-from build_service import build_pdx, ensure_mingw_on_path, find_gxx, find_podexc, project_root, run_exe
+from build_service import (
+    build_pdx,
+    detect_profits,
+    ensure_mingw_on_path,
+    find_gxx,
+    find_podexc,
+    project_root,
+    run_exe,
+)
 
 
 def cmd_version(_: argparse.Namespace) -> int:
     podexc = find_podexc(ROOT)
     gxx = find_gxx()
-    print(f"PodexCLI 0.2.3")
+    print(f"PodexCLI 0.2.4")
     print(f"  root:   {ROOT}")
     print(f"  podexc: {podexc or '(not found)'}")
     print(f"  g++:    {gxx or '(not found)'}")
@@ -50,7 +58,9 @@ def cmd_run(args: argparse.Namespace) -> int:
     print(built.log, end="")
     if not built.ok or not built.exe_path:
         return 1
-    ran = run_exe(built.exe_path)
+    profits = detect_profits(src)
+    gui = bool(profits & {"canvas", "orbit"})
+    ran = run_exe(built.exe_path, timeout=None if gui else 30.0, gui=gui)
     print(ran.log, end="")
     return 0 if ran.ok else 1
 

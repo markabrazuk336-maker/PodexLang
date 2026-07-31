@@ -2,7 +2,7 @@
 ; .pdx icons, context menu, PATH (podex / PodexCLI)
 
 #define MyAppName      "PodexLang"
-#define MyAppVersion   "0.2.3"
+#define MyAppVersion   "0.2.4"
 #define MyAppPublisher "Markazuk"
 #define MyAppURL       "https://github.com/markabrazuk336-maker/PodexLang"
 
@@ -68,8 +68,9 @@ Source: "icons\pdx.png"; DestDir: "{app}\icons"; Flags: ignoreversion skipifsour
 
 Source: "..\studio\*"; DestDir: "{app}\studio"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__\*,*.pyc"
 Source: "..\compiler\*"; DestDir: "{app}\compiler"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\stdlib\*"; DestDir: "{app}\stdlib"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\examples\*"; DestDir: "{app}\examples"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\stdlib\*"; DestDir: "{app}\stdlib"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\third_party\raylib\*"; DestDir: "{app}\third_party\raylib"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; CLI + compiler on PATH
 Source: "..\bin\podex.cmd"; DestDir: "{app}\bin"; Flags: ignoreversion

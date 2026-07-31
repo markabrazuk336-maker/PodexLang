@@ -11,7 +11,7 @@ cd D:\Cursor_Projects\PodexLang
 .\installer\build_installer.bat
 ```
 
-Готовый файл: `dist\PodexLang-Setup-0.2.3.exe`
+Готовый файл: `dist\PodexLang-Setup-0.2.4.exe`
 
 Установщик (Inno Setup 6):
 - ставит Podex Studio + `podexc` + **PodexCLI** (`podex`)
@@ -36,7 +36,7 @@ podex studio
 1. В окне нажми **Подробнее** (More info)
 2. Затем **Выполнить в любом случае** (Run anyway)
 
-Или ПКМ по `PodexLang-Setup-0.2.3.exe` → **Свойства** → внизу галка **Разблокировать** → ОК → запусти снова.
+Или ПКМ по `PodexLang-Setup-0.2.4.exe` → **Свойства** → внизу галка **Разблокировать** → ОК → запусти снова.
 
 ## Идея
 
@@ -135,6 +135,8 @@ if cond { continue }
 | `<math>`  | `sqrt`, `sin`, `cos`, `tan`, `pow`, `floor`, `ceil`, `abs` |
 | `<io>`    | `print(...)` |
 | `<str>`   | `len`, `to_string` |
+| `<canvas>` | **2D** window: `canvas_open`, `canvas_circle`, `canvas_rect`, … |
+| `<orbit>`  | **3D** window: `orbit_open`, `orbit_cube`, `orbit_sphere`, … |
 | `"name"`  | файл `name.pdx` рядом с исходником / в `-I` / в `stdlib` |
 
 Поиск: `stdlib/`, `-I`, папка исходника → `name.pdx` или `name/mod.pdx`.

@@ -167,6 +167,44 @@ def parse_diagnostics(text: str, fallback_file: Path | None = None) -> list[Diag
     return diags
 
 
+def detect_profits(source: Path) -> set[str]:
+    text = source.read_text(encoding="utf-8", errors="replace")
+    names: set[str] = set()
+    for m in re.finditer(r"#profit\s*<\s*([A-Za-z_][A-Za-z0-9_]*)\s*>", text):
+        names.add(m.group(1))
+    return names
+
+
+def raylib_root(project: Path) -> Path | None:
+    candidates = [
+        project / "third_party" / "raylib",
+        project / "third_party" / "raylib-5.5_win64_mingw-w64",
+    ]
+    for c in candidates:
+        if (c / "include" / "raylib.h").is_file() and (c / "lib" / "libraylib.a").is_file():
+            return c
+    return None
+
+
+def graphics_link_args(project: Path, profits: set[str]) -> list[str]:
+    if "canvas" not in profits and "orbit" not in profits:
+        return []
+    rl = raylib_root(project)
+    if not rl:
+        raise FileNotFoundError(
+            "raylib not found under third_party/raylib — required for #profit <canvas>/<orbit>"
+        )
+    return [
+        f"-I{rl / 'include'}",
+        f"-I{project / 'stdlib' / 'native'}",
+        f"-L{rl / 'lib'}",
+        "-lraylib",
+        "-lopengl32",
+        "-lgdi32",
+        "-lwinmm",
+    ]
+
+
 def build_pdx(source: Path, root: Path | None = None) -> BuildResult:
     try:
         return _build_pdx_impl(source, root)
@@ -198,6 +236,12 @@ def _build_pdx_impl(source: Path, root: Path | None = None) -> BuildResult:
             "Or reopen Studio after installing a C++ compiler.\n",
         )
 
+    profits = detect_profits(source)
+    try:
+        gfx_flags = graphics_link_args(root, profits)
+    except FileNotFoundError as e:
+        return BuildResult(False, str(e) + "\n")
+
     out_dir = studio_out_dir(root)
     name = source.stem
     cpp_path = out_dir / f"{name}.cpp"
@@ -205,10 +249,15 @@ def _build_pdx_impl(source: Path, root: Path | None = None) -> BuildResult:
 
     log_lines.append(f"------ Build started: {source.name} ------")
     log_lines.append(f"1> Output: {out_dir}")
+    if gfx_flags:
+        log_lines.append(f"1> Graphics modules: {', '.join(sorted(profits & {'canvas', 'orbit'}))}")
     log_lines.append("1> Compiling with podexc...")
 
     cmd1 = [str(podexc), str(source), "-o", str(cpp_path), "--stdlib", str(root / "stdlib")]
     cmd1 += ["-I", str(source.parent), "-I", str(root / "examples")]
+    # So podexc/codegen path resolution isn't needed — headers resolved at g++ link step;
+    # still pass native include for any future use
+    cmd1 += ["-I", str(root / "stdlib" / "native")]
 
     r1 = subprocess.run(
         cmd1, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(root)
@@ -231,9 +280,11 @@ def _build_pdx_impl(source: Path, root: Path | None = None) -> BuildResult:
         "-O2",
         "-finput-charset=UTF-8",
         "-fexec-charset=UTF-8",
+        f"-I{root / 'stdlib' / 'native'}",
         str(cpp_path),
         "-o",
         str(exe_path),
+        *gfx_flags,
     ]
     r2 = subprocess.run(
         cmd2, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(out_dir)
@@ -248,17 +299,40 @@ def _build_pdx_impl(source: Path, root: Path | None = None) -> BuildResult:
         diags = parse_diagnostics(r2.stderr + "\n" + r2.stdout, cpp_path)
         return BuildResult(False, log, cpp_path=cpp_path, diagnostics=diags)
 
+    # If using DLL build later, copy raylib.dll beside exe
+    rl = raylib_root(root)
+    if rl and gfx_flags:
+        dll = rl / "lib" / "raylib.dll"
+        if dll.is_file():
+            try:
+                import shutil
+
+                shutil.copy2(dll, out_dir / "raylib.dll")
+            except OSError:
+                pass
+
     log_lines.append(f"1> {exe_path}")
     log_lines.append("========== Build: 1 succeeded, 0 failed ==========")
     return BuildResult(True, "\n".join(log_lines).strip() + "\n", exe_path=exe_path, cpp_path=cpp_path)
 
 
-def run_exe(exe: Path, timeout: float = 30.0) -> BuildResult:
+def run_exe(exe: Path, timeout: float | None = 30.0, gui: bool = False) -> BuildResult:
     if not exe.is_file():
         return BuildResult(False, f"Executable not found: {exe}\n")
     ensure_mingw_on_path()
     log_lines = [f"------ Run: {exe.name} ------"]
     try:
+        if gui:
+            log_lines.append("(graphics window — close it to finish Run)")
+            # Don't capture stdout/stderr: GUI apps need a real console/window session
+            r = subprocess.run(
+                [str(exe)],
+                timeout=timeout if timeout and timeout > 0 else None,
+                cwd=str(exe.parent),
+            )
+            log_lines.append(f"------ Process exited with code {r.returncode} ------")
+            return BuildResult(r.returncode == 0, "\n".join(log_lines) + "\n", exe_path=exe)
+
         r = subprocess.run(
             [str(exe)],
             capture_output=True,

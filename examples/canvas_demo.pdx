@@ -1,0 +1,21 @@
+# PodexLang — 2D canvas demo
+#profit <canvas>
+
+fn main() -> int {
+    canvas_open(800, 600, "Podex Canvas")
+    canvas_fps(60)
+
+    while not canvas_should_close() {
+        canvas_begin()
+        canvas_clear(18, 22, 32)
+        canvas_rect(40, 40, 720, 80, 25, 90, 110)
+        canvas_text(60, 65, "PodexLang #profit <canvas>", 28, 230, 240, 255)
+        canvas_circle(400, 340, 70, 46, 196, 182)
+        canvas_line(120, 500, 680, 500, 80, 140, 200)
+        canvas_text(280, 520, "Close window to exit", 18, 180, 190, 210)
+        canvas_end()
+    }
+
+    canvas_close()
+    return 0
+}

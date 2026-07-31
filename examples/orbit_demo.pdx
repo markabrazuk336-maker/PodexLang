@@ -1,0 +1,25 @@
+# PodexLang — 3D orbit demo (mouse orbits camera)
+#profit <orbit>
+
+fn main() -> int {
+    orbit_open(900, 650, "Podex Orbit 3D")
+    orbit_fps(60)
+
+    while not orbit_should_close() {
+        orbit_begin()
+        orbit_clear(12, 14, 22)
+
+        orbit_begin_3d()
+        orbit_grid(20, 1.0)
+        orbit_cube(0.0, 0.5, 0.0, 1.5, 220, 90, 70)
+        orbit_sphere(2.5, 0.8, 0.0, 0.7, 70, 170, 230)
+        orbit_end_3d()
+
+        orbit_text(20, 20, "PodexLang #profit <orbit>", 24, 230, 240, 255)
+        orbit_text(20, 50, "Move mouse to orbit — close window to exit", 16, 170, 180, 200)
+        orbit_end()
+    }
+
+    orbit_close()
+    return 0
+}

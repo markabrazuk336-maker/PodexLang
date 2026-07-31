@@ -90,6 +90,20 @@ void ModuleResolver::register_builtins() {
             "using podex_str::to_string;\n";
         builtins_["str"] = std::move(m);
     }
+    {
+        ResolvedModule m;
+        m.name = "canvas";
+        m.cpp_includes = {"\"canvas.hpp\""};
+        m.prelude_cpp = "// PodexLang module: canvas (2D via raylib)\n";
+        builtins_["canvas"] = std::move(m);
+    }
+    {
+        ResolvedModule m;
+        m.name = "orbit";
+        m.cpp_includes = {"\"orbit.hpp\""};
+        m.prelude_cpp = "// PodexLang module: orbit (3D via raylib)\n";
+        builtins_["orbit"] = std::move(m);
+    }
 }
 
 std::string ModuleResolver::find_module_file(const std::string& name) const {
@@ -165,7 +179,7 @@ ResolvedModule ModuleResolver::resolve(const ProfitDirective& d) {
 
         throw std::runtime_error(
             "Module not found: #profit <" + d.name + "> at line " + std::to_string(d.line) +
-            "\n  searched stdlib and -I paths; known builtins: math, io, str");
+            "\n  searched stdlib and -I paths; known builtins: math, io, str, canvas, orbit");
     }
 
     // #profit "path"

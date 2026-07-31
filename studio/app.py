@@ -14,7 +14,15 @@ STUDIO_DIR = Path(__file__).resolve().parent
 if str(STUDIO_DIR) not in sys.path:
     sys.path.insert(0, str(STUDIO_DIR))
 
-from build_service import BuildResult, Diagnostic, build_pdx, find_podexc, project_root, run_exe
+from build_service import (
+    BuildResult,
+    Diagnostic,
+    build_pdx,
+    detect_profits,
+    find_podexc,
+    project_root,
+    run_exe,
+)
 from explorer import Explorer
 from projects import TEMPLATES, create_project
 from tabs import TabManager
@@ -640,9 +648,11 @@ class PodexStudio(tk.Tk):
                         messagebox.showerror(APP_NAME, "Build failed — see Output.")
                     return
 
-                def run_work(exe=b.exe_path):
+                def run_work(exe=b.exe_path, src=path):
                     try:
-                        ran = run_exe(exe)
+                        profits = detect_profits(src)
+                        gui = bool(profits & {"canvas", "orbit"})
+                        ran = run_exe(exe, timeout=None if gui else 30.0, gui=gui)
                     except Exception as e:
                         ran = BuildResult(False, f"Run crashed: {type(e).__name__}: {e}\n")
                     self.after(0, lambda r=ran: self._on_run_done(r))
