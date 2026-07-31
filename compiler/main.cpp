@@ -99,6 +99,18 @@ int main(int argc, char** argv) {
         Parser parser(std::move(lexer));
         Program program = parser.parse();
 
+        bool has_main = false;
+        for (const auto& item : program.items) {
+            if (item && item->kind == Stmt::Fn && item->name == "main") {
+                has_main = true;
+                break;
+            }
+        }
+        if (!has_main) {
+            throw std::runtime_error(
+                "missing entry point: add  fn main() -> int { ... }  at 1:1");
+        }
+
         Codegen gen(resolver);
         std::string cpp = gen.generate(program, input);
         write_file(output, cpp);

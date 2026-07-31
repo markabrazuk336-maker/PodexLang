@@ -4,7 +4,15 @@
 #include <stdexcept>
 #include <unordered_map>
 
-Lexer::Lexer(std::string source) : src_(std::move(source)) {}
+Lexer::Lexer(std::string source) : src_(std::move(source)) {
+    // Skip UTF-8 BOM (Notepad / some editors)
+    if (src_.size() >= 3 &&
+        static_cast<unsigned char>(src_[0]) == 0xEF &&
+        static_cast<unsigned char>(src_[1]) == 0xBB &&
+        static_cast<unsigned char>(src_[2]) == 0xBF) {
+        pos_ = 3;
+    }
+}
 
 char Lexer::peek_char() const {
     if (pos_ >= src_.size()) return '\0';

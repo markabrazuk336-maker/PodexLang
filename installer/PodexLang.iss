@@ -2,7 +2,7 @@
 ; Builds Setup-PodexLang-x.x.x.exe with .pdx icons + context menu
 
 #define MyAppName      "PodexLang"
-#define MyAppVersion   "0.2.1"
+#define MyAppVersion   "0.2.2"
 #define MyAppPublisher "Markazuk"
 #define MyAppURL       "https://github.com/markabrazuk336-maker/PodexLang"
 #define MyAppExeName   "PodexStudio.vbs"
