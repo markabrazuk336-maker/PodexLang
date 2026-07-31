@@ -193,7 +193,30 @@ class PodexStudio(tk.Tk):
         )
 
         def btn(text, cmd, accent=False):
-            b = ttk.Button(bar, text=text, command=cmd, style="Accent.TButton" if accent else "TButton")
+            def wrapped(_cmd=cmd):
+                try:
+                    _cmd()
+                except Exception as e:
+                    self._busy = False
+                    messagebox.showerror(APP_NAME, f"{type(e).__name__}: {e}")
+
+            bg = COLORS["accent"] if accent else COLORS["bg_input"]
+            fg = COLORS["fg_bright"] if accent else COLORS["fg"]
+            b = tk.Button(
+                bar,
+                text=text,
+                command=wrapped,
+                bg=bg,
+                fg=fg,
+                activebackground=COLORS["accent_hover"],
+                activeforeground=COLORS["fg_bright"],
+                relief="flat",
+                bd=0,
+                padx=12,
+                pady=4,
+                font=FONTS["ui"],
+                cursor="hand2",
+            )
             b.pack(side="left", padx=3, pady=6)
             return b
 
@@ -457,31 +480,39 @@ class PodexStudio(tk.Tk):
     def _ensure_saved_pdx(self) -> Path | None:
         tab = self.tabs.current()
         if not tab:
+            self._set_status("No file open")
+            messagebox.showinfo(APP_NAME, "Open a .pdx file first.")
             return None
         if tab.editor.is_changed() or tab.path is None:
             if not self.save_file():
+                self._set_status("Save cancelled — Build/Run aborted")
                 return None
         assert tab.path is not None
-        if tab.path.suffix != ".pdx":
+        if tab.path.suffix.lower() != ".pdx":
             messagebox.showinfo(APP_NAME, "Build works with .pdx files.")
             return None
         return tab.path
 
     def build_current(self) -> None:
         if self._busy:
+            self._set_status("Already building… (wait or restart Studio if stuck)")
             return
         path = self._ensure_saved_pdx()
         if not path:
             return
 
         self._busy = True
-        self._set_status("Building...")
+        self._set_status(f"Building {path.name}…")
         self._clear_errors()
         self._append_output(f"\n=== Build {path.name} ===\n", "info")
+        self.update_idletasks()
 
         def work():
-            result = build_pdx(path, ROOT)
-            self.after(0, lambda: self._on_build_done(result))
+            try:
+                result = build_pdx(path, ROOT)
+            except Exception as e:
+                result = BuildResult(False, f"Build crashed: {type(e).__name__}: {e}\n")
+            self.after(0, lambda r=result: self._on_build_done(r))
 
         threading.Thread(target=work, daemon=True).start()
 
@@ -499,32 +530,43 @@ class PodexStudio(tk.Tk):
 
     def run_current(self) -> None:
         if self._busy:
+            self._set_status("Already building… (wait or restart Studio if stuck)")
             return
         path = self._ensure_saved_pdx()
         if not path:
             return
 
         self._busy = True
-        self._set_status("Building & running...")
+        self._set_status(f"Building & running {path.name}…")
         self._clear_errors()
+        self._append_output(f"\n=== Run {path.name} ===\n", "info")
+        self.update_idletasks()
 
         def work():
-            built = build_pdx(path, ROOT)
+            try:
+                built = build_pdx(path, ROOT)
+            except Exception as e:
+                built = BuildResult(False, f"Build crashed: {type(e).__name__}: {e}\n")
 
-            def after_build():
-                self._append_output(built.log, "ok" if built.ok else "err")
-                self._show_diagnostics(built.diagnostics)
-                if not built.ok or not built.exe_path:
+            def after_build(b=built):
+                self._append_output(b.log, "ok" if b.ok else "err")
+                self._show_diagnostics(b.diagnostics)
+                if not b.ok or not b.exe_path:
                     self._busy = False
                     self._set_status("Build failed")
-                    if built.diagnostics:
+                    if b.diagnostics:
                         self.bottom_nb.select(1)
-                        self._jump_to_diagnostic(built.diagnostics[0])
+                        self._jump_to_diagnostic(b.diagnostics[0])
+                    else:
+                        messagebox.showerror(APP_NAME, "Build failed — see Output.")
                     return
 
-                def run_work():
-                    ran = run_exe(built.exe_path)
-                    self.after(0, lambda: self._on_run_done(ran))
+                def run_work(exe=b.exe_path):
+                    try:
+                        ran = run_exe(exe)
+                    except Exception as e:
+                        ran = BuildResult(False, f"Run crashed: {type(e).__name__}: {e}\n")
+                    self.after(0, lambda r=ran: self._on_run_done(r))
 
                 threading.Thread(target=run_work, daemon=True).start()
 

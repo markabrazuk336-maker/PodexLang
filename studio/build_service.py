@@ -62,10 +62,31 @@ def find_gxx() -> str | None:
     which = shutil.which("g++")
     if which:
         return which
-    winget = Path.home() / "AppData/Local/Microsoft/WinGet/Packages"
-    if winget.is_dir():
-        for p in winget.rglob("g++.exe"):
-            return str(p)
+
+    # Fast known locations (avoid scanning all of WinGet)
+    home = Path.home()
+    candidates = [
+        home / "AppData/Local/Microsoft/WinGet/Packages",
+        Path(r"C:\mingw64\bin\g++.exe"),
+        Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "mingw64" / "bin" / "g++.exe",
+        Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "mingw64" / "bin" / "g++.exe",
+    ]
+    for c in candidates:
+        if c.is_file() and c.name.lower() == "g++.exe":
+            return str(c)
+        if c.is_dir():
+            try:
+                for pkg in c.iterdir():
+                    name = pkg.name.lower()
+                    if "winlibs" not in name and "mingw" not in name:
+                        continue
+                    direct = pkg / "mingw64" / "bin" / "g++.exe"
+                    if direct.is_file():
+                        return str(direct)
+                    for hit in pkg.glob("*/mingw64/bin/g++.exe"):
+                        return str(hit)
+            except OSError:
+                continue
     return None
 
 
@@ -77,6 +98,21 @@ def ensure_mingw_on_path() -> None:
     path = os.environ.get("PATH", "")
     if bin_dir.lower() not in path.lower():
         os.environ["PATH"] = bin_dir + os.pathsep + path
+
+
+def studio_out_dir(root: Path) -> Path:
+    """Writable output dir — falls back to %LOCALAPPDATA% if install dir is locked."""
+    preferred = root / "build" / "studio_out"
+    try:
+        preferred.mkdir(parents=True, exist_ok=True)
+        probe = preferred / ".podex_write_test"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink(missing_ok=True)
+        return preferred
+    except OSError:
+        fallback = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "PodexLang" / "studio_out"
+        fallback.mkdir(parents=True, exist_ok=True)
+        return fallback
 
 
 def parse_diagnostics(text: str, fallback_file: Path | None = None) -> list[Diagnostic]:
@@ -132,6 +168,13 @@ def parse_diagnostics(text: str, fallback_file: Path | None = None) -> list[Diag
 
 
 def build_pdx(source: Path, root: Path | None = None) -> BuildResult:
+    try:
+        return _build_pdx_impl(source, root)
+    except Exception as e:
+        return BuildResult(False, f"Build crashed: {type(e).__name__}: {e}\n")
+
+
+def _build_pdx_impl(source: Path, root: Path | None = None) -> BuildResult:
     root = root or project_root()
     source = source.resolve()
     log_lines: list[str] = []
@@ -149,15 +192,19 @@ def build_pdx(source: Path, root: Path | None = None) -> BuildResult:
     ensure_mingw_on_path()
     gxx = find_gxx()
     if not gxx:
-        return BuildResult(False, "g++ not found. Install MinGW-w64 / WinLibs and add it to PATH.\n")
+        return BuildResult(
+            False,
+            "g++ not found. Install MinGW-w64 / WinLibs and add it to PATH.\n"
+            "Or reopen Studio after installing a C++ compiler.\n",
+        )
 
-    out_dir = root / "build" / "studio_out"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = studio_out_dir(root)
     name = source.stem
     cpp_path = out_dir / f"{name}.cpp"
     exe_path = out_dir / f"{name}.exe"
 
     log_lines.append(f"------ Build started: {source.name} ------")
+    log_lines.append(f"1> Output: {out_dir}")
     log_lines.append("1> Compiling with podexc...")
 
     cmd1 = [str(podexc), str(source), "-o", str(cpp_path), "--stdlib", str(root / "stdlib")]
@@ -176,12 +223,20 @@ def build_pdx(source: Path, root: Path | None = None) -> BuildResult:
         return BuildResult(False, log, cpp_path=cpp_path, diagnostics=diags)
 
     log_lines.append(f"1> {source.name} -> {cpp_path.name}")
-    log_lines.append("1> Linking with g++...")
+    log_lines.append(f"1> Linking with g++ ({gxx})...")
 
-    cmd2 = [gxx, "-std=c++17", "-O2", "-finput-charset=UTF-8", "-fexec-charset=UTF-8",
-            str(cpp_path), "-o", str(exe_path)]
+    cmd2 = [
+        gxx,
+        "-std=c++17",
+        "-O2",
+        "-finput-charset=UTF-8",
+        "-fexec-charset=UTF-8",
+        str(cpp_path),
+        "-o",
+        str(exe_path),
+    ]
     r2 = subprocess.run(
-        cmd2, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(root)
+        cmd2, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(out_dir)
     )
     if r2.stdout:
         log_lines.append(r2.stdout)
