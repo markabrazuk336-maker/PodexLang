@@ -62,3 +62,12 @@ inline void orbit_text(int x, int y, const char* text, int size, int r, int g, i
 inline void orbit_text(int x, int y, const std::string& text, int size, int r, int g, int b) {
     orbit_text(x, y, text.c_str(), size, r, g, b);
 }
+
+// Input — same key codes as canvas (LEFT=263 RIGHT=262 UP=265 DOWN=264 W/A/S/D)
+#ifndef PODEX_ORBIT_INPUT
+#define PODEX_ORBIT_INPUT
+inline bool orbit_key_down(int key) { return IsKeyDown(key); }
+inline bool orbit_key_pressed(int key) { return IsKeyPressed(key); }
+inline int orbit_mouse_x() { return GetMouseX(); }
+inline int orbit_mouse_y() { return GetMouseY(); }
+#endif

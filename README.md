@@ -11,7 +11,7 @@ cd D:\Cursor_Projects\PodexLang
 .\installer\build_installer.bat
 ```
 
-Готовый файл: `dist\PodexLang-Setup-0.2.4.exe`
+Готовый файл: `dist\PodexLang-Setup-0.2.5.exe`
 
 Установщик (Inno Setup 6):
 - ставит Podex Studio + `podexc` + **PodexCLI** (`podex`)
@@ -36,7 +36,7 @@ podex studio
 1. В окне нажми **Подробнее** (More info)
 2. Затем **Выполнить в любом случае** (Run anyway)
 
-Или ПКМ по `PodexLang-Setup-0.2.4.exe` → **Свойства** → внизу галка **Разблокировать** → ОК → запусти снова.
+Или ПКМ по `PodexLang-Setup-0.2.5.exe` → **Свойства** → внизу галка **Разблокировать** → ОК → запусти снова.
 
 ## Идея
 

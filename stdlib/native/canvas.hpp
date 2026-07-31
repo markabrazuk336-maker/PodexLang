@@ -41,3 +41,12 @@ inline void canvas_text(int x, int y, const char* text, int size, int r, int g, 
 inline void canvas_text(int x, int y, const std::string& text, int size, int r, int g, int b) {
     canvas_text(x, y, text.c_str(), size, r, g, b);
 }
+
+// Input — raylib key codes: LEFT=263 RIGHT=262 UP=265 DOWN=264 W=87 A=65 S=83 D=68 SPACE=32
+#ifndef PODEX_CANVAS_INPUT
+#define PODEX_CANVAS_INPUT
+inline bool canvas_key_down(int key) { return IsKeyDown(key); }
+inline bool canvas_key_pressed(int key) { return IsKeyPressed(key); }
+inline int canvas_mouse_x() { return GetMouseX(); }
+inline int canvas_mouse_y() { return GetMouseY(); }
+#endif

@@ -1,0 +1,52 @@
+# Paste in Podex Studio — 3D control test
+#profit <orbit>
+
+# Keys: W/A/S/D = 87/65/83/68, SPACE = 32
+# Mouse moves the camera (orbit)
+
+fn main() -> int {
+    orbit_open(900, 650, "Podex Orbit — control me")
+    orbit_fps(60)
+
+    let mut x = 0.0
+    let mut z = 0.0
+    let mut y = 0.5
+    let step = 0.08
+
+    while not orbit_should_close() {
+        if orbit_key_down(65) {
+            x = x - step
+        }
+        if orbit_key_down(68) {
+            x = x + step
+        }
+        if orbit_key_down(87) {
+            z = z - step
+        }
+        if orbit_key_down(83) {
+            z = z + step
+        }
+        if orbit_key_down(32) {
+            y = y + step
+        }
+        if orbit_key_down(67) {
+            y = y - step
+        }
+
+        orbit_begin()
+        orbit_clear(12, 14, 22)
+
+        orbit_begin_3d()
+        orbit_grid(24, 1.0)
+        orbit_cube(x, y, z, 1.2, 220, 90, 70)
+        orbit_sphere(2.5, 0.8, -1.0, 0.6, 70, 170, 230)
+        orbit_end_3d()
+
+        orbit_text(20, 20, "WASD move cube | SPACE up | C down | mouse = camera", 18, 230, 240, 255)
+        orbit_text(20, 48, "Close window to exit", 16, 160, 170, 190)
+        orbit_end()
+    }
+
+    orbit_close()
+    return 0
+}

@@ -1,0 +1,47 @@
+# Paste in Podex Studio — 2D control test
+#profit <canvas>
+
+# Keys: LEFT=263 RIGHT=262 UP=265 DOWN=264
+# Mouse follows the small circle
+
+fn main() -> int {
+    canvas_open(800, 600, "Podex Canvas — control me")
+    canvas_fps(60)
+
+    let mut x = 400
+    let mut y = 300
+    let speed = 6
+
+    while not canvas_should_close() {
+        if canvas_key_down(263) {
+            x = x - speed
+        }
+        if canvas_key_down(262) {
+            x = x + speed
+        }
+        if canvas_key_down(265) {
+            y = y - speed
+        }
+        if canvas_key_down(264) {
+            y = y + speed
+        }
+
+        let mx = canvas_mouse_x()
+        let my = canvas_mouse_y()
+
+        canvas_begin()
+        canvas_clear(18, 22, 32)
+        canvas_rect(0, 0, 800, 50, 25, 90, 110)
+        canvas_text(16, 14, "Arrows move ball | mouse = small circle", 20, 230, 240, 255)
+
+        canvas_circle(x, y, 36, 46, 196, 182)
+        canvas_circle(mx, my, 12, 255, 180, 80)
+        canvas_line(x, y, mx, my, 80, 140, 200)
+
+        canvas_text(16, 560, "Close window to exit", 16, 160, 170, 190)
+        canvas_end()
+    }
+
+    canvas_close()
+    return 0
+}

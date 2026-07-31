@@ -42,6 +42,20 @@ def project_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
+def find_podex_tree(start: Path) -> Path | None:
+    """Walk up from a source file to a PodexLang checkout (stdlib/native + studio)."""
+    p = start.resolve()
+    if p.is_file():
+        p = p.parent
+    for _ in range(10):
+        if (p / "stdlib" / "native").is_dir() and (p / "studio").is_dir():
+            return p
+        if p.parent == p:
+            break
+        p = p.parent
+    return None
+
+
 def find_podexc(root: Path | None = None) -> Path | None:
     root = root or project_root()
     candidates = [
@@ -213,8 +227,9 @@ def build_pdx(source: Path, root: Path | None = None) -> BuildResult:
 
 
 def _build_pdx_impl(source: Path, root: Path | None = None) -> BuildResult:
-    root = root or project_root()
     source = source.resolve()
+    # Prefer the PodexLang tree that owns the source (dev checkout over Program Files install)
+    root = root or find_podex_tree(source) or project_root()
     log_lines: list[str] = []
 
     podexc = find_podexc(root)

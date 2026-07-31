@@ -2,7 +2,7 @@
 ; .pdx icons, context menu, PATH (podex / PodexCLI)
 
 #define MyAppName      "PodexLang"
-#define MyAppVersion   "0.2.4"
+#define MyAppVersion   "0.2.5"
 #define MyAppPublisher "Markazuk"
 #define MyAppURL       "https://github.com/markabrazuk336-maker/PodexLang"
 

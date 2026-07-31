@@ -94,14 +94,31 @@ void ModuleResolver::register_builtins() {
         ResolvedModule m;
         m.name = "canvas";
         m.cpp_includes = {"\"canvas.hpp\""};
-        m.prelude_cpp = "// PodexLang module: canvas (2D via raylib)\n";
+        m.prelude_cpp =
+            "// PodexLang module: canvas (2D via raylib)\n"
+            // Fallback if an older canvas.hpp is on the include path
+            "#ifndef PODEX_CANVAS_INPUT\n"
+            "#define PODEX_CANVAS_INPUT\n"
+            "inline bool canvas_key_down(int key) { return IsKeyDown(key); }\n"
+            "inline bool canvas_key_pressed(int key) { return IsKeyPressed(key); }\n"
+            "inline int canvas_mouse_x() { return GetMouseX(); }\n"
+            "inline int canvas_mouse_y() { return GetMouseY(); }\n"
+            "#endif\n";
         builtins_["canvas"] = std::move(m);
     }
     {
         ResolvedModule m;
         m.name = "orbit";
         m.cpp_includes = {"\"orbit.hpp\""};
-        m.prelude_cpp = "// PodexLang module: orbit (3D via raylib)\n";
+        m.prelude_cpp =
+            "// PodexLang module: orbit (3D via raylib)\n"
+            "#ifndef PODEX_ORBIT_INPUT\n"
+            "#define PODEX_ORBIT_INPUT\n"
+            "inline bool orbit_key_down(int key) { return IsKeyDown(key); }\n"
+            "inline bool orbit_key_pressed(int key) { return IsKeyPressed(key); }\n"
+            "inline int orbit_mouse_x() { return GetMouseX(); }\n"
+            "inline int orbit_mouse_y() { return GetMouseY(); }\n"
+            "#endif\n";
         builtins_["orbit"] = std::move(m);
     }
 }

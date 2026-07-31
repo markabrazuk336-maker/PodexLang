@@ -27,7 +27,7 @@ from build_service import (
 def cmd_version(_: argparse.Namespace) -> int:
     podexc = find_podexc(ROOT)
     gxx = find_gxx()
-    print(f"PodexCLI 0.2.4")
+    print(f"PodexCLI 0.2.5")
     print(f"  root:   {ROOT}")
     print(f"  podexc: {podexc or '(not found)'}")
     print(f"  g++:    {gxx or '(not found)'}")
