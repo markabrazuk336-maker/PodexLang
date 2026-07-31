@@ -1,0 +1,2 @@
+# PodexLang stdlib marker: str
+# Built-in: len(s), to_string(v)

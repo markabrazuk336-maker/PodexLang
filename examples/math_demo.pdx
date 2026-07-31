@@ -1,0 +1,18 @@
+# PodexLang — math demo
+#profit <io>
+#profit <math>
+
+fn main() -> int {
+    let x = 16.0
+    let y = sqrt(x)
+    let z = pow(2.0, 8.0)
+
+    print("sqrt(16) =")
+    print(y)
+    print("2^8 =")
+    print(z)
+    print("sin(0) =")
+    print(sin(0.0))
+
+    return 0
+}

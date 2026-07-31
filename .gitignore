@@ -1,0 +1,75 @@
+# --- Build / CMake ---
+build/
+out/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+install_manifest.txt
+_deps/
+*.cmake
+!CMakeLists.txt
+
+# --- Compiled / binaries ---
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+*.app
+*.pdb
+*.ilk
+*.exp
+*.idb
+*.ipdb
+*.iobj
+
+# Generated C++ from podexc (keep compiler sources)
+*.cpp
+!compiler/*.cpp
+
+# Studio build artifacts
+build/studio_out/
+
+# User projects created in Studio
+projects/
+
+# --- Python / Studio ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+
+# --- IDE / OS ---
+.vs/
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.user
+*.suo
+*.ncb
+*.aps
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- Logs / temp ---
+*.log
+*.tmp
+*.temp
+*~

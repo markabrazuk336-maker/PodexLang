@@ -1,0 +1,3 @@
+# PodexLang stdlib marker: io
+# Built-in module — resolved by the compiler to C++ iostream.
+# Available: print(...)

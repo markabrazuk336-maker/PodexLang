@@ -1,0 +1,3 @@
+# PodexLang stdlib marker: math
+# Built-in module — resolved by the compiler to C++ <cmath>.
+# Available: sqrt, sin, cos, tan, pow, floor, ceil, abs, abs_f

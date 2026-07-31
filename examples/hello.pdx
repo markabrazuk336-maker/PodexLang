@@ -1,0 +1,8 @@
+# PodexLang - hello
+#profit <io>
+
+fn main() -> int {
+    print("Hello, PodexLang!")
+    print("No #include here - only #profit")
+    return 0
+}

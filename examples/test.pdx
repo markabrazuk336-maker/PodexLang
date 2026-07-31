@@ -1,0 +1,6 @@
+#profit <io>
+
+fn main() -> int {
+    print("Hello from Podex Studio!")
+    return 0
+}

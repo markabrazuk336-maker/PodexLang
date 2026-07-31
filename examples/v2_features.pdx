@@ -1,0 +1,75 @@
+# New language features: for / arrays / break / continue / push / len
+#profit <io>
+#profit <math>
+
+fn main() -> int {
+    print("===== for + arrays =====")
+
+    # exclusive range: 0..5 -> 0,1,2,3,4
+    print("0..5")
+    for i in 0..5 {
+        print(i)
+    }
+
+    # inclusive range: 1..=5 -> 1..5
+    print("1..=5")
+    let mut total = 0
+    for i in 1..=5 {
+        total = total + i
+    }
+    print(total)
+
+    # array literal + index + mutate
+    let mut nums = [10, 20, 30, 40]
+    print("len")
+    print(len(nums))
+    print("nums[0]")
+    print(nums[0])
+    nums[1] = 99
+    print("nums[1] after set")
+    print(nums[1])
+
+    # for-each over array
+    print("foreach")
+    for x in nums {
+        print(x)
+    }
+
+    # push
+    push(nums, 50)
+    print("after push len")
+    print(len(nums))
+
+    # break / continue
+    print("odds under 10 (continue/break)")
+    for i in 0..100 {
+        if i >= 10 {
+            break
+        }
+        if i % 2 == 0 {
+            continue
+        }
+        print(i)
+    }
+
+    # nested: fill squares
+    let mut squares = [0, 0, 0, 0, 0]
+    for i in 0..5 {
+        squares[i] = i * i
+    }
+    print("squares")
+    for s in squares {
+        print(s)
+    }
+
+    # mix with math
+    let mut acc = 0.0
+    for i in 1..=4 {
+        acc = acc + sqrt(i * 1.0)
+    }
+    print("sum sqrt 1..4")
+    print(acc)
+
+    print("===== DONE =====")
+    return 0
+}

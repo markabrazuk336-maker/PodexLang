@@ -1,0 +1,218 @@
+# Hard stress-test for PodexLang / Podex Studio
+# Open in Studio and press F5
+#profit <io>
+#profit <math>
+#profit <str>
+
+fn clamp(x: float, lo: float, hi: float) -> float {
+    if x < lo {
+        return lo
+    }
+    if x > hi {
+        return hi
+    }
+    return x
+}
+
+fn max3(a: int, b: int, c: int) -> int {
+    let mut m = a
+    if b > m {
+        m = b
+    }
+    if c > m {
+        m = c
+    }
+    return m
+}
+
+fn is_even(n: int) -> bool {
+    return n % 2 == 0
+}
+
+fn factorial(n: int) -> int {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+fn fib(n: int) -> int {
+    if n < 2 {
+        return n
+    }
+    return fib(n - 1) + fib(n - 2)
+}
+
+fn gcd(a: int, b: int) -> int {
+    let mut x = a
+    let mut y = b
+    while y != 0 {
+        let t = y
+        y = x % y
+        x = t
+    }
+    return x
+}
+
+fn collatz_steps(n: int) -> int {
+    let mut x = n
+    let mut steps = 0
+    while x != 1 {
+        if is_even(x) {
+            x = x / 2
+        } else {
+            x = 3 * x + 1
+        }
+        steps = steps + 1
+        if steps > 1000 {
+            return -1
+        }
+    }
+    return steps
+}
+
+fn hypot(a: float, b: float) -> float {
+    return sqrt(a * a + b * b)
+}
+
+fn circle_area(r: float) -> float {
+    let pi = 3.1415926535
+    return pi * r * r
+}
+
+fn classify(n: int) -> string {
+    if n < 0 {
+        return "negative"
+    } else {
+        if n == 0 {
+            return "zero"
+        } else {
+            if is_even(n) {
+                return "positive-even"
+            } else {
+                return "positive-odd"
+            }
+        }
+    }
+}
+
+fn logic_battery(a: bool, b: bool) -> int {
+    let mut score = 0
+    if a and b {
+        score = score + 1
+    }
+    if a or b {
+        score = score + 2
+    }
+    if not a {
+        score = score + 4
+    }
+    if not (a and not b) {
+        score = score + 8
+    }
+    return score
+}
+
+fn sum_range(from: int, to: int) -> int {
+    let mut i = from
+    let mut s = 0
+    while i <= to {
+        s = s + i
+        i = i + 1
+    }
+    return s
+}
+
+fn pow_int(base: int, exp: int) -> int {
+    let mut r = 1
+    let mut e = exp
+    while e > 0 {
+        r = r * base
+        e = e - 1
+    }
+    return r
+}
+
+fn report(title: string, value: int) -> void {
+    print(title)
+    print(value)
+}
+
+fn report_f(title: string, value: float) -> void {
+    print(title)
+    print(value)
+}
+
+fn report_s(title: string, value: string) -> void {
+    print(title)
+    print(value)
+}
+
+fn main() -> int {
+    print("===== PodexLang HARD TEST =====")
+
+    # --- ints / recursion / loops ---
+    report("factorial(6) =", factorial(6))
+    report("fib(12) =", fib(12))
+    report("gcd(84, 30) =", gcd(84, 30))
+    report("collatz(27) steps =", collatz_steps(27))
+    report("sum 1..100 =", sum_range(1, 100))
+    report("2^10 =", pow_int(2, 10))
+    report("max3(9, 42, 7) =", max3(9, 42, 7))
+
+    # --- floats / math module ---
+    let r = 5.0
+    report_f("sqrt(2) =", sqrt(2.0))
+    report_f("pow(2, 8) =", pow(2.0, 8.0))
+    report_f("sin(0) =", sin(0.0))
+    report_f("cos(0) =", cos(0.0))
+    report_f("hypot(3, 4) =", hypot(3.0, 4.0))
+    report_f("circle area r=5 =", circle_area(r))
+    report_f("clamp(12.5, 0, 10) =", clamp(12.5, 0.0, 10.0))
+    report_f("floor(3.9) =", floor(3.9))
+    report_f("ceil(3.1) =", ceil(3.1))
+
+    # --- bool / and or not / nested if ---
+    report("logic(true, false) =", logic_battery(true, false))
+    report("logic(false, false) =", logic_battery(false, false))
+    report_s("classify(-3) =", classify(-3))
+    report_s("classify(0) =", classify(0))
+    report_s("classify(8) =", classify(8))
+    report_s("classify(7) =", classify(7))
+
+    # --- strings / str module ---
+    let name = "PodexLang"
+    report("len(PodexLang) =", len(name))
+    print(to_string(256))
+    print(to_string(3.14))
+
+    # --- mixed stress loop ---
+    print("--- mixed loop ---")
+    let mut i = 1
+    let mut acc = 0.0
+    while i <= 10 {
+        let fi = i
+        # float from int via math
+        let ang = fi * 0.5
+        acc = acc + sin(ang) * cos(ang)
+        if is_even(i) and i > 4 {
+            print(i)
+        }
+        i = i + 1
+    }
+    report_f("acc sin*cos =", acc)
+
+    # --- final checks (expected values) ---
+    print("===== EXPECT =====")
+    print("factorial(6) => 720")
+    print("fib(12) => 144")
+    print("gcd(84,30) => 6")
+    print("collatz(27) => 111")
+    print("sum 1..100 => 5050")
+    print("2^10 => 1024")
+    print("hypot(3,4) => 5")
+    print("logic(true,false) => 2")
+    print("logic(false,false) => 12")
+    print("===== DONE =====")
+    return 0
+}
